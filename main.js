@@ -145,70 +145,91 @@ const quiz = [
   
 ];
 
-
-
 let quizIndex = 0;
 let score = 0;
 let filteredQuiz = []; // グローバル変数として定義
 
+const checkAnswer = (answer) => {
+  const q = filteredQuiz[quizIndex];
+
+  if (q.isCorrect(answer.trim())) {
+    window.alert("正解！");
+    score++;
+  } else {
+    window.alert("不正解！");
+  }
+
+  quizIndex++;
+
+  if (quizIndex < filteredQuiz.length) {
+    setupQuiz();
+  } else {
+    window.alert(`終了！あなたの正解数は ${score}/${filteredQuiz.length} です！`);
+  }
+};
+
+const clickHandler = (e) => {
+  checkAnswer(e.target.textContent);
+};
+
 const startQuiz = (level) => {
   console.log(level);
-    // レベル選択画面を非表示
-    document.getElementById('level-selection').style.display = 'none';
-    // クイズ画面を表示
-    document.getElementById('quiz-container').style.display = 'block';
 
-    // 選択されたレベルに応じてクイズをフィルタリング
-    quizIndex = 0;
-    score = 0;
-    filteredQuiz = quiz.filter(q => q.level === level); // グローバル変数に代入
+  document.getElementById('level-selection').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
 
-    // 最初のクイズをセットアップ
-    setupQuiz();
+  quizIndex = 0;
+  score = 0;
+
+  filteredQuiz = quiz.filter(q => q.level === level);
+
+  setupQuiz();
 };
-
 
 const setupQuiz = () => {
-  
-      document.getElementById('question').textContent = filteredQuiz[quizIndex].question;
 
-    // クイズ用ボタンを取得
-    const quizButtons = document.getElementsByClassName('quiz-button');
-    const textInput = document.getElementById('text-input');
-    const submitButton = document.querySelector('input[type="submit"]');
-    // isTextQuestionフラグで分岐
-    if (filteredQuiz[quizIndex].isTextQuestion) {
-      console.log("記述式問題");
-        // 記述式問題の場合
-        for (let buttonIndex = 0; buttonIndex < quizButtons.length; buttonIndex++) {
-            quizButtons[buttonIndex].style.display = 'none';
-        }
-        if (textInput){
-          textInput.style.display = 'block';
-          textInput.value = ''; // テキスト入力フィールドをクリア
-        } 
-        if (checkButton) checkButton.style.display = 'block';
-    } else {
-      console.log("選択式問題");
-        // 選択式問題の場合
-        for (let buttonIndex = 0; buttonIndex < quizButtons.length; buttonIndex++) {
-            quizButtons[buttonIndex].style.display = 'inline-block';
-            quizButtons[buttonIndex].textContent = filteredQuiz[quizIndex].choices[buttonIndex];
-        }
-        if (textInput) textInput.style.display = 'none';
-        if (checkButton) checkButton.style.display = 'none';
+  document.getElementById('question').textContent =
+    filteredQuiz[quizIndex].question;
+
+  const quizButtons = document.getElementsByClassName('quiz-button');
+  const textInput = document.getElementById('text-input');
+  const checkButton = document.getElementById('checkButton');
+
+  // 記述式
+  if (filteredQuiz[quizIndex].isTextQuestion) {
+    console.log("記述式問題");
+
+    for (let btn of quizButtons) btn.style.display = 'none';
+
+    if (textInput) {
+      textInput.style.display = 'block';
+      textInput.value = '';
     }
-};
-const clickHandler = (e) => {
 
-  console.log("aa");
-    if (filteredQuiz[quizIndex].isCorrect(e.target.textContent)) {
-       window.alert("正解！");
-       score++;
+    if (checkButton) checkButton.style.display = 'block';
+
+  } else {
+    // 選択式
+    console.log("選択式問題");
+
+    for (let i = 0; i < quizButtons.length; i++) {
+      quizButtons[i].style.display = 'inline-block';
+      quizButtons[i].textContent = filteredQuiz[quizIndex].choices[i];
+    }
+
+    if (textInput) textInput.style.display = 'none';
+    if (checkButton) checkButton.style.display = 'none';
+  }
+};
+
+
+function handleAnswer(answer) {
+    if (filteredQuiz[quizIndex].isCorrect(answer)) {
+        window.alert("正解！");
+        score++;
     } else {
         window.alert("不正解！");
     }
-   
 
     quizIndex++;
 
@@ -217,38 +238,24 @@ const clickHandler = (e) => {
     } else {
         window.alert('終了！あなたの正解数は' + score + '/' + filteredQuiz.length + 'です！');
     }
-};
+}
 
 window.onload = () => {
-    // クイズ用ボタンにイベントリスナーを追加
-    const quizButtons = document.getElementsByClassName('quiz-button');
-    for (let buttonIndex = 0; buttonIndex < quizButtons.length; buttonIndex++) {
-        quizButtons[buttonIndex].addEventListener('click', (e) => {
-            clickHandler(e);
-        });
-    }
-    const checkButton = document.getElementById('checkButton');
-    const textInput = document.getElementById('text-input');
-    if (checkButton) {
-        checkButton.onclick = function() {
-            // 入力値を取得
-            const userAnswer = textInput.value.trim();
-            // 正解判定
-            //if (userAnswer === filteredQuiz[quizIndex].correct.trim()) {
-            if (filteredQuiz[quizIndex].isCorrect(userAnswer)) {
-                window.alert("正解！");
-                score++;
-            } else {
-                window.alert("不正解！");
-            }
-            quizIndex++;
-            if (quizIndex < filteredQuiz.length) {
-                setupQuiz();
-            } else {
-                window.alert('終了！あなたの正解数は' + score + '/' + filteredQuiz.length + 'です！');
-            }
-      };
-    }  
+const quizButtons = document.getElementsByClassName('quiz-button');
+  const checkButton = document.getElementById('checkButton');
+  const textInput = document.getElementById('text-input');
+
+  // 選択式ボタン
+  for (let btn of quizButtons) {
+    btn.addEventListener('click', clickHandler);
+  }
+
+  // 記述式ボタン
+  if (checkButton) {
+    checkButton.onclick = function () {
+      checkAnswer(textInput.value.trim());
+    };
+  }
 };
 
 // レベル選択ボタンにイベントリスナーを追加
