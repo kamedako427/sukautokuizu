@@ -17,18 +17,21 @@ class ChoicesQuiz {
     this.isTextQuestion = flag;
   }
 
- isCorrect(answer) {
+isCorrect(answer) {
   if (this.isTextQuestion) {
     if (Array.isArray(this.correct)) {
       return this.correct.some(c => c.trim() === answer.trim());
     }
     return this.correct.trim() === answer.trim();
   }
+
   if (Array.isArray(this.correct)) {
     return this.correct.includes(answer);
   }
+
   return this.correct === answer;
 }
+
   
 }
 
