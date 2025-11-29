@@ -199,42 +199,6 @@ const setupQuiz = () => {
         if (checkButton) checkButton.style.display = 'none';
     }
 };
-const isTextQuestion = () =>{
-  
-  // テキスト入力のクイズを設定
-  filteredQuiz[quizIndex].setTextQuestion(true);
-  document.getElementById('question').textContent = filteredQuiz[quizIndex].question;
-  
-  // クイズ用ボタンを非表示にする
-  const quizButtons = document.getElementsByClassName('quiz-button');
-  for (let buttonIndex = 0; buttonIndex < quizButtons.length; buttonIndex++) {
-    quizButtons[buttonIndex].style.display = 'none';
-  }
-
-  // テキスト入力フィールドを表示
-  const textInput = document.getElementById('text-input');
-  const checkButton = document.getElementById('checkButton');
-  
-};
-
-function checkButtonClick(){
-  console.log("ボタンがクリックされました");
-  if (textInput.value.trim() == filteredQuiz[quizIndex].correct.trim()) {
-    window.alert("正解！");
-    score++;
-  } else {
-    window.alert("不正解！");
-  }
-  quizIndex++;
-  if (quizIndex < filteredQuiz.length) {
-    setupQuiz();
-  }
-  else {
-    window.alert('終了！あなたの正解数は' + score + '/' + filteredQuiz.length + 'です！');
-  }
-}
-
-
 const clickHandler = (e) => {
 
   console.log("aa");
