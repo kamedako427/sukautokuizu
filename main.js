@@ -214,7 +214,7 @@ const isTextQuestion = () =>{
   // テキスト入力フィールドを表示
   const textInput = document.getElementById('text-input');
   const checkButton = document.getElementById('checkButton');
-  textInput.style.display = 'block';
+  
 };
 
 function checkButtonClick(){
