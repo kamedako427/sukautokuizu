@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css">
+    <title>QuizJS</title>
+</head>
+<body>
+    <div id="level-selection" class="card">
+        <h2>レベルを選択してください</h2>
+        <div class="choice">
+            <button id="level-beginner">初級</button>
+            <button id="level-intermediate">2級</button>
+            <button id="level-advanced">1級</button>
+        </div>
+    </div>
+    
+    
+    
+    <!-- TODO 
+
+     文章題の作成
+     承認者　中野リーダー、道下先生、多中隊長
+     検証　団加入員 -->
+    <div id="quiz-container" class="card" style="display: none;">
+        <h2 id="question"></h2>
+        <div class="choice">
+            <button class="quiz-button"></button>
+            <button class="quiz-button"></button>
+            <button class="quiz-button"></button>
+            <button class="quiz-button"></button>
+        </div>
+        <div id="quizbar">
+            <form>
+                <input type ="text" placeholder="答えを入力してください" id="text-input" class="bar" />
+                <input type="button" value="答え" id="checkButton">
+
+            </form>
+            
+        </div>
+    
+    </div>
+   
+    <script src="main.js"></script>
+</body>
+</html>
