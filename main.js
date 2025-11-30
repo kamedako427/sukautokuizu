@@ -225,24 +225,6 @@ const setupQuiz = () => {
   }
 };
 
-
-function handleAnswer(answer) {
-    if (filteredQuiz[quizIndex].isCorrect(answer)) {
-        window.alert("正解！");
-        score++;
-    } else {
-        window.alert("不正解！");
-    }
-
-    quizIndex++;
-
-    if (quizIndex < filteredQuiz.length) {
-        setupQuiz();
-    } else {
-        window.alert('終了！あなたの正解数は' + score + '/' + filteredQuiz.length + 'です！');
-    }
-}
-
 window.onload = () => {
 const quizButtons = document.getElementsByClassName('quiz-button');
   const checkButton = document.getElementById('checkButton');
