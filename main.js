@@ -150,7 +150,10 @@ const quiz = [
 
 let quizIndex = 0;
 let score = 0;
-let filteredQuiz = []; // グローバル変数として定義
+let filteredQuiz = [];
+ // グローバル変数として定義
+let wrongAnswers = [];
+
 
 const checkAnswer = (answer) => {
   const q = filteredQuiz[quizIndex];
@@ -160,6 +163,10 @@ const checkAnswer = (answer) => {
     score++;
   } else {
     window.alert("不正解！");
+    wrongAnswers.push({
+      question: q.question,
+      correct: q.correct
+    });
   }
 
   quizIndex++;
@@ -167,9 +174,10 @@ const checkAnswer = (answer) => {
   if (quizIndex < filteredQuiz.length) {
     setupQuiz();
   } else {
-    window.alert(`終了！あなたの正解数は ${score}/${filteredQuiz.length} です！`);
+    showResultAndExplanation();
   }
 };
+
 
 const clickHandler = (e) => {
   checkAnswer(e.target.textContent);
@@ -242,6 +250,42 @@ const quizButtons = document.getElementsByClassName('quiz-button');
     };
   }
 };
+
+const showResultAndExplanation = () => {
+  // クイズ画面を非表示
+  document.getElementById('quiz-container').style.display = 'none';
+
+  // 結果エリアを表示
+  const resultArea = document.getElementById('result-area');
+  resultArea.style.display = 'block';
+
+  // 正解数表示
+  document.getElementById('result-score').textContent =
+    `あなたの正解数は ${score}/${filteredQuiz.length} です`;
+
+  // 解説表示
+  const explanationArea = document.getElementById('explanations');
+  explanationArea.innerHTML = '';
+
+  if (wrongAnswers.length === 0) {
+    explanationArea.textContent = '全問正解です！おめでとうございます！';
+    return;
+  }
+
+  wrongAnswers.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <h3>不正解問題 ${index + 1}</h3>
+      <p><strong>問題：</strong>${item.question}</p>
+      <p><strong>正解：</strong>
+        ${Array.isArray(item.correct) ? item.correct.join(' / ') : item.correct}
+      </p>
+      <hr>
+    `;
+    explanationArea.appendChild(div);
+  });
+};
+
 
 // レベル選択ボタンにイベントリスナーを追加
 document.getElementById('level-beginner').addEventListener('click', () => startQuiz('初級'));
