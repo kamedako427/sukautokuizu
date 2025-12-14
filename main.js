@@ -156,23 +156,16 @@ let wrongAnswers = [];
 ========================== */
 const checkAnswer = (answer) => {
   const q = filteredQuiz[quizIndex];
+  const isCorrect = q.isCorrect(answer.trim());
 
-  if (q.isCorrect(answer.trim())) {
-    alert('正解！');
-    score++;
-  } else {
-    alert('不正解！');
-    wrongAnswers.push(q);
-  }
+  if (isCorrect) score++;
+  else wrongAnswers.push(q);
 
-  quizIndex++;
+  showFeedback(isCorrect);
 
-  if (quizIndex < filteredQuiz.length) {
-    setupQuiz();
-  } else {
-    showResultAndExplanation();
-  }
+  quizIndex++; // ← ここだけ進める（表示はshowFeedback内）
 };
+
 
 /* ==========================
    選択肢クリック
@@ -326,16 +319,108 @@ window.onload = () => {
   checkButton.onclick = () => {
     checkAnswer(textInput.value);
   };
+
+  // ★ レベル選択もここに入れる
+  document.getElementById('level-beginner')
+    .addEventListener('click', () => startQuiz('初級'));
+
+  document.getElementById('level-intermediate')
+    .addEventListener('click', () => startQuiz('2級'));
+
+  document.getElementById('level-advanced')
+    .addEventListener('click', () => startQuiz('1級'));
 };
 
-/* ==========================
-   レベル選択
-========================== */
-document.getElementById('level-beginner')
-  .addEventListener('click', () => startQuiz('初級'));
+function showFeedback(isCorrect) {
+  const feedback = document.getElementById('feedback');
+  const symbol = document.getElementById('feedback-symbol');
+  const text = document.getElementById('feedback-text');
 
-document.getElementById('level-intermediate')
-  .addEventListener('click', () => startQuiz('2級'));
+  if (isCorrect) {
+    symbol.textContent = '◯';
+    text.textContent = '正解！！';
+    symbol.className = 'correct';
+    text.className = 'correct';
+  } else {
+    symbol.textContent = '×';
+    text.textContent = '不正解…';
+    symbol.className = 'wrong';
+    text.className = 'wrong';
+  }
 
-document.getElementById('level-advanced')
-  .addEventListener('click', () => startQuiz('1級'));
+  feedback.style.display = 'flex';
+
+ setTimeout(() => {
+  feedback.style.display = 'none';
+
+  if (quizIndex < filteredQuiz.length) {
+    setupQuiz();
+  } else {
+    showResultAndExplanation();
+  }
+}, 1200);
+
+}
+
+// ===============================
+// 次の問題 or 結果
+// ===============================
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex < filteredQuiz.length) {
+    showQuestion();
+  } else {
+    showResult();
+  }
+}
+
+// ===============================
+// 結果表示 + 解説
+// ===============================
+function showResult() {
+  document.getElementById('quiz-container').style.display = 'none';
+  document.getElementById('result-area').style.display = 'block';
+
+  document.getElementById('result-score').textContent =
+    `正解数：${score} / ${filteredQuiz.length}`;
+
+  const area = document.getElementById('explanations');
+  area.innerHTML = '';
+
+  filteredQuiz.forEach((q, i) => {
+    const div = document.createElement('div');
+
+    const isWrong = wrongAnswers.includes(q);
+
+    div.innerHTML = `
+      <p>Q${i + 1}：${q.question}</p>
+      <p>結果：
+        <span style="color:${isWrong ? 'red' : 'green'}">
+          ${isWrong ? '不正解' : '正解'}
+        </span>
+      </p>
+      <p>正解：${Array.isArray(q.correct) ? q.correct.join(' / ') : q.correct}</p>
+    `;
+
+    if (q.explanation) {
+      const btn = document.createElement('button');
+      btn.textContent = '解説を開く';
+
+      const exp = document.createElement('div');
+      exp.style.display = 'none';
+      exp.textContent = q.explanation;
+
+      btn.addEventListener('click', () => {
+        const open = exp.style.display === 'block';
+        exp.style.display = open ? 'none' : 'block';
+        btn.textContent = open ? '解説を開く' : '解説を閉じる';
+      });
+
+      div.appendChild(btn);
+      div.appendChild(exp);
+    }
+
+    div.appendChild(document.createElement('hr'));
+    area.appendChild(div);
+  });
+}
