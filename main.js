@@ -13,27 +13,20 @@ class ChoicesQuiz {
     this.isTextQuestion = isTextQuestion;
   }
 
-  setTextQuestion(flag) {
-    this.isTextQuestion = flag;
-  }
-
-isCorrect(answer) {
-  if (this.isTextQuestion) {
-    if (Array.isArray(this.correct)) {
-      return this.correct.some(c => c.trim() === answer.trim());
+  isCorrect(answer) {
+    if (this.isTextQuestion) {
+      if (Array.isArray(this.correct)) {
+        return this.correct.some(c => c.trim() === answer.trim());
+      }
+      return this.correct.trim() === answer.trim();
     }
-    return this.correct.trim() === answer.trim();
+    if (Array.isArray(this.correct)) {
+      return this.correct.includes(answer);
+    }
+    return this.correct === answer;
   }
-
-  if (Array.isArray(this.correct)) {
-    return this.correct.includes(answer);
-  }
-
-  return this.correct === answer;
 }
 
-  
-}
 
 const quiz = [
   new ChoicesQuiz('Q1.ボーイスカウトのモットーは？（日本語で解答）', ['選択肢1'], 'そなえよつねに', '初級', true),
@@ -148,25 +141,26 @@ const quiz = [
   
 ];
 
+
+
+
 let quizIndex = 0;
 let score = 0;
 let filteredQuiz = [];
- // グローバル変数として定義
-let wrongAnswers = [];
+let wrongAnswers = []; // 間違えた問題用
 
-
+/* --------------------
+   回答チェック
+-------------------- */
 const checkAnswer = (answer) => {
   const q = filteredQuiz[quizIndex];
 
   if (q.isCorrect(answer.trim())) {
-    window.alert("正解！");
+    alert("正解！");
     score++;
   } else {
-    window.alert("不正解！");
-    wrongAnswers.push({
-      question: q.question,
-      correct: q.correct
-    });
+    alert("不正解！");
+    wrongAnswers.push(q); // 問題オブジェクトを保存
   }
 
   quizIndex++;
@@ -178,92 +172,74 @@ const checkAnswer = (answer) => {
   }
 };
 
-
+/* --------------------
+   選択肢クリック
+-------------------- */
 const clickHandler = (e) => {
   checkAnswer(e.target.textContent);
 };
 
+/* --------------------
+   クイズ開始
+-------------------- */
 const startQuiz = (level) => {
-  console.log(level);
-
   document.getElementById('level-selection').style.display = 'none';
+  document.getElementById('result-area').style.display = 'none';
   document.getElementById('quiz-container').style.display = 'block';
 
   quizIndex = 0;
   score = 0;
+  wrongAnswers = [];
 
   filteredQuiz = quiz.filter(q => q.level === level);
 
   setupQuiz();
 };
 
+/* --------------------
+   問題表示
+-------------------- */
 const setupQuiz = () => {
+  const q = filteredQuiz[quizIndex];
 
-  document.getElementById('question').textContent =
-    filteredQuiz[quizIndex].question;
+  document.getElementById('question').textContent = q.question;
 
   const quizButtons = document.getElementsByClassName('quiz-button');
   const textInput = document.getElementById('text-input');
   const checkButton = document.getElementById('checkButton');
 
-  // 記述式
-  if (filteredQuiz[quizIndex].isTextQuestion) {
-    console.log("記述式問題");
-
+  if (q.isTextQuestion) {
+    // 記述式
     for (let btn of quizButtons) btn.style.display = 'none';
 
-    if (textInput) {
-      textInput.style.display = 'block';
-      textInput.value = '';
-    }
-
-    if (checkButton) checkButton.style.display = 'block';
+    textInput.style.display = 'block';
+    textInput.value = '';
+    checkButton.style.display = 'block';
 
   } else {
     // 選択式
-    console.log("選択式問題");
-
     for (let i = 0; i < quizButtons.length; i++) {
       quizButtons[i].style.display = 'inline-block';
-      quizButtons[i].textContent = filteredQuiz[quizIndex].choices[i];
+      quizButtons[i].textContent = q.choices[i];
     }
 
-    if (textInput) textInput.style.display = 'none';
-    if (checkButton) checkButton.style.display = 'none';
+    textInput.style.display = 'none';
+    checkButton.style.display = 'none';
   }
 };
 
-window.onload = () => {
-const quizButtons = document.getElementsByClassName('quiz-button');
-  const checkButton = document.getElementById('checkButton');
-  const textInput = document.getElementById('text-input');
-
-  // 選択式ボタン
-  for (let btn of quizButtons) {
-    btn.addEventListener('click', clickHandler);
-  }
-
-  // 記述式ボタン
-  if (checkButton) {
-    checkButton.onclick = function () {
-      checkAnswer(textInput.value.trim());
-    };
-  }
-};
-
+/* --------------------
+   結果＆解説表示
+-------------------- */
 const showResultAndExplanation = () => {
-  // クイズ画面を非表示
   document.getElementById('quiz-container').style.display = 'none';
 
-  // 結果エリアを表示
   const resultArea = document.getElementById('result-area');
   resultArea.style.display = 'block';
 
-  // 正解数表示
   document.getElementById('result-score').textContent =
-    `あなたの正解数は ${score}/${filteredQuiz.length} です`;
+    `あなたの正解数は ${score} / ${filteredQuiz.length} です`;
 
-  // 解説表示
   const explanationArea = document.getElementById('explanations');
   explanationArea.innerHTML = '';
 
@@ -272,13 +248,13 @@ const showResultAndExplanation = () => {
     return;
   }
 
-  wrongAnswers.forEach((item, index) => {
+  wrongAnswers.forEach((q, index) => {
     const div = document.createElement('div');
     div.innerHTML = `
       <h3>不正解問題 ${index + 1}</h3>
-      <p><strong>問題：</strong>${item.question}</p>
+      <p><strong>問題：</strong>${q.question}</p>
       <p><strong>正解：</strong>
-        ${Array.isArray(item.correct) ? item.correct.join(' / ') : item.correct}
+        ${Array.isArray(q.correct) ? q.correct.join(' / ') : q.correct}
       </p>
       <hr>
     `;
@@ -286,8 +262,52 @@ const showResultAndExplanation = () => {
   });
 };
 
+/* --------------------
+   間違えた問題だけ解き直す
+-------------------- */
+const retryWrongQuiz = () => {
+  if (wrongAnswers.length === 0) {
+    alert('間違えた問題がありません');
+    return;
+  }
 
-// レベル選択ボタンにイベントリスナーを追加
-document.getElementById('level-beginner').addEventListener('click', () => startQuiz('初級'));
-document.getElementById('level-intermediate').addEventListener('click', () => startQuiz('2級'));
-document.getElementById('level-advanced').addEventListener('click', () => startQuiz('1級'));
+  document.getElementById('result-area').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+
+  filteredQuiz = [...wrongAnswers];
+
+  quizIndex = 0;
+  score = 0;
+  wrongAnswers = [];
+
+  setupQuiz();
+};
+
+/* --------------------
+   初期イベント設定
+-------------------- */
+window.onload = () => {
+  const quizButtons = document.getElementsByClassName('quiz-button');
+  const checkButton = document.getElementById('checkButton');
+  const textInput = document.getElementById('text-input');
+
+  for (let btn of quizButtons) {
+    btn.addEventListener('click', clickHandler);
+  }
+
+  checkButton.onclick = () => {
+    checkAnswer(textInput.value);
+  };
+};
+
+/* --------------------
+   レベル選択
+-------------------- */
+document.getElementById('level-beginner')
+  .addEventListener('click', () => startQuiz('初級'));
+
+document.getElementById('level-intermediate')
+  .addEventListener('click', () => startQuiz('2級'));
+
+document.getElementById('level-advanced')
+  .addEventListener('click', () => startQuiz('1級'));
